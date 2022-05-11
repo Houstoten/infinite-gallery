@@ -28,20 +28,24 @@ const config: HardhatUserConfig = {
     providerPriority: ["web3modal", "hardhat"],
   },
   paths: {
-    "react": "./frontend-next/hardhat",
-    "deployments": './frontend-next/hardhat/deployments',
+    "react": "./frontend/hardhat",
+    "deployments": './frontend/hardhat/deployments',
   },
   typechain: {
-    "outDir": "./frontend-next/hardhat/typechain",
+    "outDir": "./frontend/hardhat/typechain",
     "target": "ethers-v5"
   },
   networks: {
     hardhat: {
       chainId: 1337,
       inject: false, // optional. If true, it will EXPOSE your mnemonic in your frontend code. Then it would be available as an "in-page browser wallet" / signer which can sign without confirmation.
-      accounts: {
-        mnemonic: "test test test test test test test test test test test junk", // test test test test test test test test test test test junk
-      },
+      accounts: [
+        {
+          balance: "10000000000000000000000",
+          privateKey:
+            "0xe87d780e4c31c953a68aef2763df56599c9cfe73df4740fc24c2d0f5acd21bae",
+        },
+      ],
     },
     // hardhat: {
     //   accounts: [
@@ -56,7 +60,7 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.7.3",
+        version: "0.8.13",
         settings: {
           optimizer: {
             enabled: true,

@@ -11,7 +11,7 @@ It runs up a Hardhat node, compile contracts, generates typescript interfaces, c
 ```
 
 4. Open up a new terminal
-5. Enter the frontend-next directory: `cd frontend-next`
+5. Enter the frontend directory: `cd frontend`
 6. Install dependencies: `npm install`
 7. Import seed phrase in Metamask. The default mnemonic currently used by hardhat is `test test test test test test test test test test test junk`
 8. Please note that you need to sign out from your current Metamask wallet to import a new one. **Instead of logging out**, you can use a new browser profile to do your Ethereum development:
