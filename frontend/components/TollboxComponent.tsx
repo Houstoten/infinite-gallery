@@ -22,9 +22,9 @@ const ToolboxComponent: FC<{
         <Grid alignItems="center" css={{display: 'flex'}}>
             <Button onClick={onClearCanvas}>Clear Canvas</Button>
         </Grid>
-        <Grid alignItems="center" css={{display: 'flex'}}>
+        {/* <Grid alignItems="center" css={{display: 'flex'}}>
             <Button onClick={onLoadGeneralCanvas}>Load Saved</Button>
-        </Grid>
+        </Grid> */}
     </Grid.Container>
 }
 

@@ -1,18 +1,24 @@
 import { fabric } from "fabric";
 import { Canvas } from 'fabric/fabric-impl';
-import { FC, useContext, useEffect, useRef, useState } from "react";
+import React, { FC, useContext, useEffect, useRef, useState } from "react";
 import { useWindowSize } from 'usehooks-ts'
 import ToolboxComponent from "./TollboxComponent";
 import * as R from 'ramda'
 import { PinataPinResponse } from "@pinata/sdk";
 import Pako from "pako";
 import { CanvasSaverContext } from "../hardhat/SymfoniContext";
+import hash from 'hash-it';
+import toast from 'react-hot-toast';
+
+const warningToast = (text: string) => toast(text, { icon: "⚠️" })
 
 const CanvasComponent: FC = () => {
 
     const canvasSaver = useContext(CanvasSaverContext)
 
     const canvas = useRef<Canvas>()
+
+    const [nonEditable, loadNonEditable] = useState<string[]>([])
 
     const [drawingMode, setDrawingMode] = useState<boolean>(false);
 
@@ -51,21 +57,54 @@ const CanvasComponent: FC = () => {
         canvas.current && (canvas.current.isDrawingMode = drawingMode)
     }, [drawingMode])
 
+    useEffect(() => {
+        loadNonEditable([])
+
+        onGetEventLog().then(objectList => {
+            objectList.forEach(singleObject => loadNonEditable(R.concat(singleObject.objects.map(hash))))
+            const _fabricObject = objectList.reduce((acc, currentObject) => ({ ...acc, ...currentObject, objects: R.concat(acc.objects ?? [], currentObject.objects) }), {})
+
+            canvas.current?.loadFromJSON(_fabricObject, () => canvas.current?.renderAll(), function (o: any, object: any) {
+                object.set('selectable', false);
+            })
+
+        })
+
+    }, [canvasSaver.instance])
+
     const onPublishClick = async () => {
+        //@ts-ignore
+        const jsonObject: any = R.over(R.lensProp('objects'), R.reject(object => R.find(R.equals(hash(object)), nonEditable)), canvas.current?.toJSON())
+        if (jsonObject.objects.length === 0) {
+            warningToast('Nothing to publish')
+            return
+        }
+
+        const toastId = toast.loading('Initializing transaction...');
         const { IpfsHash } = await fetch("/api/publish", {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(canvas.current?.toJSON())
+            body: JSON.stringify(jsonObject)
         }).then(data => data.json() as Promise<PinataPinResponse>)
 
-        canvasSaver.instance?.saveCanvasItem(IpfsHash)
+
+        canvasSaver.instance?.saveCanvasItem(IpfsHash).then(() => {
+            toast.success('Transaction succeed', {
+                id: toastId,
+            });
+        })
     }
 
     const onClearCanvas = () => {
-        canvas.current?.clear()
+        canvas.current?.getObjects().forEach(object => {
+            //@ts-ignore
+            if (!R.find(R.equals(hash(object.toJSON())), nonEditable)) {
+                canvas.current?.remove(object)
+            }
+        })
     }
 
     const getIPFSFabricJSON = async (ipfsHash: string) => {
@@ -79,15 +118,9 @@ const CanvasComponent: FC = () => {
         if (canvasSaver.instance) {
             const eventData: any = await canvasSaver.instance.queryFilter(canvasSaver.instance.filters.SaveToLog(null, null))
 
-            const objectList = await Promise.all(eventData.map(R.path(['args', 'canvasItem'])).map(getIPFSFabricJSON))
-
-            const _fabricObject = objectList.reduce((acc, currentObject) => ({ ...acc, ...currentObject, objects: R.concat(acc.objects ?? [], currentObject.objects) }), {})
-
-            canvas.current?.loadFromJSON(_fabricObject, () => canvas.current?.renderAll(), function (o: any, object: any) {
-                object.set('selectable', false);
-            })
-
+            return await Promise.all(eventData.map(R.path(['args', 'canvasItem'])).map(getIPFSFabricJSON))
         }
+        return []
     }
 
     return <>
@@ -101,8 +134,6 @@ const CanvasComponent: FC = () => {
             onClearCanvas={onClearCanvas}
             onLoadGeneralCanvas={onGetEventLog}
         />
-        {/* <button onClick={() => console.log(canvas.current?.toJSON(["selectable", "objects"]))}>TO JSON</button>
-        <button onClick={() => setDrawingMode(mode => !mode)}>Drawing mode is {drawingMode ? "active" : "disabled"}</button> */}
     </>
 }
 
