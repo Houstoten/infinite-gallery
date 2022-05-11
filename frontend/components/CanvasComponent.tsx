@@ -8,8 +8,6 @@ import { PinataPinResponse } from "@pinata/sdk";
 import Pako from "pako";
 import { CanvasSaverContext } from "../hardhat/SymfoniContext";
 
-const ipfsHash = "QmW5wTLcErLbSwndcsJozuBsL44LJWSWQvAq2637YLD7d8"
-
 const CanvasComponent: FC = () => {
 
     const canvasSaver = useContext(CanvasSaverContext)
@@ -75,13 +73,6 @@ const CanvasComponent: FC = () => {
         const responseUInt8Array = new Uint8Array(responseArrayBuffer)
 
         return JSON.parse(Pako.inflate(responseUInt8Array, { to: 'string' }))
-    }
-
-    const onLoadGeneralCanvas = async () => {
-        const responseJson = await getIPFSFabricJSON(ipfsHash)
-        canvas.current?.loadFromJSON(responseJson, () => canvas.current?.renderAll(), function (o: any, object: any) {
-            object.set('selectable', false);
-        })
     }
 
     const onGetEventLog = async () => {
