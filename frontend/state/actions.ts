@@ -20,7 +20,7 @@ export interface SetCanvasElement {
 
 export interface SetNonEditable {
     type: ActionType.SetNonEditable
-    payload: string[]
+    payload: any[]
 }
 
 export interface SetBrushColor {

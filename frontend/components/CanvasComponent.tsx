@@ -8,7 +8,7 @@ import { CanvasSaverContext } from "../hardhat/SymfoniContext";
 import hash from 'hash-it';
 import toast from 'react-hot-toast';
 import { useCanvas } from "../state/context";
-import { setCanvas } from "../state/reducer";
+import { setCanvas, setNonEditable } from "../state/reducer";
 
 const warningToast = (text: string) => toast(text, { icon: "⚠️" })
 
@@ -18,10 +18,7 @@ const CanvasComponent: FC = () => {
 
     const { state, dispatch } = useCanvas()
 
-    // const canvas = useRef<Canvas>()
-    const { canvasObject } = state
-
-    const [nonEditable, loadNonEditable] = useState<string[]>([])
+    const { canvasObject, nonEditable } = state
 
     const [drawingMode, setDrawingMode] = useState<boolean>(false);
 
@@ -29,11 +26,11 @@ const CanvasComponent: FC = () => {
 
     const { height, width } = useWindowSize()
 
-    // useEffect(() => {
-    //     if (!state.canvasObject) {
-    //         dispatch(setCanvas(canvasjjjRef))
-    //     }
-    // }, []);
+    useEffect(() => {
+        if(canvasObject){
+            setNonEditable(canvasSaver).then(dispatch)
+        }
+    }, [canvasObject, canvasSaver.instance]);
 
     useEffect(() => {
         canvasObject?.setDimensions?.({ width, height })
@@ -42,22 +39,6 @@ const CanvasComponent: FC = () => {
     useEffect(() => {
         canvasObject && (canvasObject.isDrawingMode = drawingMode)
     }, [drawingMode])
-
-    useEffect(() => {
-        if (canvasObject) {
-            loadNonEditable([])
-
-            onGetEventLog().then(objectList => {
-                objectList.forEach(singleObject => loadNonEditable(R.concat(singleObject.objects.map(hash))))
-                const _fabricObject = objectList.reduce((acc, currentObject) => ({ ...acc, ...currentObject, objects: R.concat(acc.objects ?? [], currentObject.objects) }), {})
-
-                canvasObject?.loadFromJSON(_fabricObject, () => canvasObject?.renderAll(), function (o: any, object: any) {
-                    object.set('selectable', false);
-                })
-
-            })
-        }
-    }, [canvasSaver.instance, canvasObject])
 
     const onPublishClick = async () => {
         //@ts-ignore
@@ -94,22 +75,6 @@ const CanvasComponent: FC = () => {
         })
     }
 
-    const getIPFSFabricJSON = async (ipfsHash: string) => {
-        const responseArrayBuffer = await fetch("https://ipfs.io/ipfs/" + ipfsHash).then(data => data.blob()).then(blob => blob.arrayBuffer())
-        const responseUInt8Array = new Uint8Array(responseArrayBuffer)
-
-        return JSON.parse(Pako.inflate(responseUInt8Array, { to: 'string' }))
-    }
-
-    const onGetEventLog = async () => {
-        if (canvasSaver.instance) {
-            const eventData: any = await canvasSaver.instance.queryFilter(canvasSaver.instance.filters.SaveToLog(null, null))
-
-            return await Promise.all(eventData.map(R.path(['args', 'canvasItem'])).map(getIPFSFabricJSON))
-        }
-        return []
-    }
-
     return <>
         <canvas id="canvas" ref={memoRefCallback} />
 
@@ -119,7 +84,6 @@ const CanvasComponent: FC = () => {
             setEditable={setDrawingMode}
             onPublishClick={onPublishClick}
             onClearCanvas={onClearCanvas}
-            onLoadGeneralCanvas={onGetEventLog}
         />
     </>
 }

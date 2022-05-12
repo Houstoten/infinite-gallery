@@ -14,11 +14,10 @@ const ToolboxComponent: FC<{
     setEditable: (editable: boolean) => void,
     onPublishClick: () => void,
     onClearCanvas: () => void,
-    onLoadGeneralCanvas: () => void,
-}> = ({ css, editable, setEditable, onPublishClick, onClearCanvas, onLoadGeneralCanvas }) => {
+}> = ({ css, editable, setEditable, onPublishClick, onClearCanvas }) => {
     const { state, dispatch } = useCanvas()
 
-    const {brush: {color}} = state
+    const { brush: { color } } = state
 
     return <Grid.Container gap={2} css={css}>
         <Grid>

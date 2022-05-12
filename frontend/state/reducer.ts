@@ -2,12 +2,15 @@ import { fabric } from "fabric";
 import { ActionType, CanvasActions, SetBrushColor, SetBrushThickness, SetCanvasElement, SetNonEditable } from "./actions";
 import { CanvasState } from "./state";
 import * as R from 'ramda'
+import { SymfoniCanvasSaver } from "../hardhat/SymfoniContext";
+import { onGetEventLog } from "../utils/loadCanvasDataUtils";
+import hash from 'hash-it';
 
 export const canvasReducer = (state: CanvasState, action: CanvasActions): CanvasState => {
     switch (action.type) {
         case ActionType.SetCanvasElement: {
 
-            const canvasObject = new fabric.Canvas(action.payload?? 'canvas', {
+            const canvasObject = new fabric.Canvas(action.payload ?? 'canvas', {
                 backgroundColor: 'rgba(0,0,0,0)',
                 isDrawingMode: false,
             })
@@ -40,12 +43,19 @@ export const canvasReducer = (state: CanvasState, action: CanvasActions): Canvas
         }
         case ActionType.SetNonEditable: {
 
-            // state.canvasObject?.loadFromJSON(_fabricObject, () => canvasObject?.renderAll(), function (o: any, object: any) {
-            //     object.set('selectable', false);
-            // })
+            const objectList = action.payload
+
+            const nonEditable: string[] = objectList.reduce((acc, singleObject) => [...acc, ...singleObject.objects.map(hash)], [])
+
+            const _fabricObject = objectList.reduce((acc, currentObject) => ({ ...acc, ...currentObject, objects: R.concat(acc.objects ?? [], currentObject.objects) }), {})
+
+            state.canvasObject?.loadFromJSON(_fabricObject, () => state.canvasObject?.renderAll(), function (o: any, object: any) {
+                object.set('selectable', false);
+            })
+
             return {
                 ...state,
-                nonEditable: action.payload
+                nonEditable: nonEditable 
             }
         }
         case ActionType.SetBrushColor: {
@@ -77,10 +87,15 @@ export const setCanvas = (canvasElement: HTMLCanvasElement): SetCanvasElement =>
     payload: canvasElement
 })
 
-export const setNonEditable = (nonEditable: string[]): SetNonEditable => ({
-    type: ActionType.SetNonEditable,
-    payload: nonEditable
-})
+export const setNonEditable = async (canvasSaver: SymfoniCanvasSaver): Promise<SetNonEditable> => {
+
+    const objectList = await onGetEventLog(canvasSaver)
+
+    return {
+        type: ActionType.SetNonEditable,
+        payload: objectList
+    }
+}
 
 export const setBrushColor = (color: string): SetBrushColor => ({
     type: ActionType.SetBrushColor,
