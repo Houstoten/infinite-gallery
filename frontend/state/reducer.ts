@@ -1,10 +1,14 @@
 import { fabric } from "fabric";
-import { ActionType, CanvasActions, SetBrushColor, SetBrushThickness, SetCanvasElement, SetNonEditable } from "./actions";
+import { ActionType, CanvasActions, SetBrushColor, SetBrushThickness, SetCanvasElement, SetNonEditable, SetPublishCanvasResult } from "./actions";
 import { CanvasState } from "./state";
 import * as R from 'ramda'
 import { SymfoniCanvasSaver } from "../hardhat/SymfoniContext";
 import { onGetEventLog } from "../utils/loadCanvasDataUtils";
 import hash from 'hash-it';
+import { warningToast } from "../utils/toastUtils";
+import toast from "react-hot-toast";
+import { PinataPinResponse } from "@pinata/sdk";
+import { Canvas } from "fabric/fabric-impl";
 
 export const canvasReducer = (state: CanvasState, action: CanvasActions): CanvasState => {
     switch (action.type) {
@@ -55,7 +59,7 @@ export const canvasReducer = (state: CanvasState, action: CanvasActions): Canvas
 
             return {
                 ...state,
-                nonEditable: nonEditable 
+                nonEditable: nonEditable
             }
         }
         case ActionType.SetBrushColor: {
@@ -94,6 +98,45 @@ export const setNonEditable = async (canvasSaver: SymfoniCanvasSaver): Promise<S
     return {
         type: ActionType.SetNonEditable,
         payload: objectList
+    }
+}
+
+export const publishCanvasChanges = async (canvasSaver: SymfoniCanvasSaver, nonEditable: string[], canvasObject?: Canvas): Promise<SetPublishCanvasResult> => {
+
+    if(!canvasObject){
+        warningToast('Canvas is not detected')
+    }
+    //@ts-ignore
+    const jsonObject: any = R.over(R.lensProp('objects'), R.reject(object => R.find(R.equals(hash(object)), nonEditable)), canvasObject.toJSON())
+    if (jsonObject.objects.length === 0) {
+        warningToast('Nothing to publish')
+        return {
+            type: ActionType.SetPublishCanvasResult,
+            payload: true
+        }
+    }
+
+    const toastId = toast.loading('Initializing transaction...');
+
+    const { IpfsHash } = await fetch("/api/publish", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jsonObject)
+    }).then(data => data.json() as Promise<PinataPinResponse>)
+
+
+    await canvasSaver.instance?.saveCanvasItem(IpfsHash).then(() => {
+        toast.success('Transaction succeed', {
+            id: toastId,
+        });
+    })
+
+    return {
+        type: ActionType.SetPublishCanvasResult,
+        payload: true
     }
 }
 

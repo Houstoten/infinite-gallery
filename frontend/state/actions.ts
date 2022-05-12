@@ -5,7 +5,8 @@ export enum ActionType {
     SetCanvasObject,
     SetNonEditable,
     SetBrushColor,
-    SetBrushThickness
+    SetBrushThickness,
+    SetPublishCanvasResult
 }
 
 export interface SetCanvasObject {
@@ -33,4 +34,9 @@ export interface SetBrushThickness {
     payload: number
 }
 
-export type CanvasActions = SetCanvasObject | SetCanvasElement | SetNonEditable | SetBrushColor | SetBrushThickness
+export interface SetPublishCanvasResult {
+    type: ActionType.SetPublishCanvasResult
+    payload: boolean
+}
+
+export type CanvasActions = SetCanvasObject | SetCanvasElement | SetNonEditable | SetBrushColor | SetBrushThickness | SetPublishCanvasResult

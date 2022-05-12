@@ -8,7 +8,7 @@ import { CanvasSaverContext } from "../hardhat/SymfoniContext";
 import hash from 'hash-it';
 import toast from 'react-hot-toast';
 import { useCanvas } from "../state/context";
-import { setCanvas, setNonEditable } from "../state/reducer";
+import { publishCanvasChanges, setCanvas, setNonEditable } from "../state/reducer";
 
 const warningToast = (text: string) => toast(text, { icon: "⚠️" })
 
@@ -40,30 +40,8 @@ const CanvasComponent: FC = () => {
         canvasObject && (canvasObject.isDrawingMode = drawingMode)
     }, [drawingMode])
 
-    const onPublishClick = async () => {
-        //@ts-ignore
-        const jsonObject: any = R.over(R.lensProp('objects'), R.reject(object => R.find(R.equals(hash(object)), nonEditable)), canvasObject.toJSON())
-        if (jsonObject.objects.length === 0) {
-            warningToast('Nothing to publish')
-            return
-        }
-
-        const toastId = toast.loading('Initializing transaction...');
-        const { IpfsHash } = await fetch("/api/publish", {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(jsonObject)
-        }).then(data => data.json() as Promise<PinataPinResponse>)
-
-
-        canvasSaver.instance?.saveCanvasItem(IpfsHash).then(() => {
-            toast.success('Transaction succeed', {
-                id: toastId,
-            });
-        })
+    const onPublishClick =  () => {
+       publishCanvasChanges(canvasSaver, nonEditable, canvasObject).then(dispatch)
     }
 
     const onClearCanvas = () => {
