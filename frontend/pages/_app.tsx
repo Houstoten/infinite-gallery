@@ -2,6 +2,7 @@ import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import { Symfoni } from '../hardhat/SymfoniContext'
 import { Toaster } from 'react-hot-toast';
+import { CanvasContextProvider } from '../state/context';
 
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -18,7 +19,9 @@ function MyApp({ Component, pageProps }: AppProps) {
       },
       position: 'top-right'
     }} />
-    <Component {...pageProps} />
+    <CanvasContextProvider>
+      <Component {...pageProps} />
+    </CanvasContextProvider>
   </Symfoni>
 }
 
