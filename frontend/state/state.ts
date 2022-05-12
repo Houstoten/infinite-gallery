@@ -1,9 +1,8 @@
 import { Canvas } from "fabric/fabric-impl"
-import { RefObject } from "react"
 
 export interface CanvasState {
     canvasObject?: Canvas
-    canvasRef?: RefObject<HTMLCanvasElement>
+    canvasElement?: HTMLCanvasElement
     nonEditable?: string[]
     brush: Brush
 }

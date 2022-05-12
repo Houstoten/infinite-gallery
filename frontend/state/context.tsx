@@ -19,7 +19,7 @@ export const CanvasContextProvider: FC<{ children: ReactElement }> = ({ children
     </CanvasContext.Provider>
 }
 
-const useCanvas = (): { state: CanvasState, dispatch: React.Dispatch<CanvasActions> } => {
+export const useCanvas = (): { state: CanvasState, dispatch: React.Dispatch<CanvasActions> } => {
     const ctxtValue = useContext(CanvasContext)
 
     return ctxtValue

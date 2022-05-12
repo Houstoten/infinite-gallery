@@ -1,6 +1,4 @@
-import { fabric } from "fabric";
-import { Canvas } from 'fabric/fabric-impl';
-import React, { FC, useContext, useEffect, useRef, useState } from "react";
+import React, { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useWindowSize } from 'usehooks-ts'
 import ToolboxComponent from "./TollboxComponent";
 import * as R from 'ramda'
@@ -9,6 +7,8 @@ import Pako from "pako";
 import { CanvasSaverContext } from "../hardhat/SymfoniContext";
 import hash from 'hash-it';
 import toast from 'react-hot-toast';
+import { useCanvas } from "../state/context";
+import { setCanvas } from "../state/reducer";
 
 const warningToast = (text: string) => toast(text, { icon: "⚠️" })
 
@@ -16,65 +16,52 @@ const CanvasComponent: FC = () => {
 
     const canvasSaver = useContext(CanvasSaverContext)
 
-    const canvas = useRef<Canvas>()
+    const { state, dispatch } = useCanvas()
+
+    // const canvas = useRef<Canvas>()
+    const { canvasObject } = state
 
     const [nonEditable, loadNonEditable] = useState<string[]>([])
 
     const [drawingMode, setDrawingMode] = useState<boolean>(false);
 
-    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const memoRefCallback = useCallback(R.compose(dispatch, setCanvas), [])
 
     const { height, width } = useWindowSize()
 
-    useEffect(() => {
-        if (!canvas.current) {
-            canvas.current = new fabric.Canvas(canvasRef.current ?? 'canvas', {
-                backgroundColor: 'rgba(0,0,0,0)',
-                isDrawingMode: false,
-            });
-            canvas.current.on('mouse:wheel', function (opt) {
-                const delta = opt.e.deltaY;
-                const zoom = canvas.current?.getZoom() ?? 0;
-
-                const calculatedZoom = R.cond([
-                    [R.gte(0.8), R.always(0.8)],
-                    [R.lte(5), R.always(5)],
-                    [R.T, R.identity],
-                ])(zoom * 0.999 ** delta)
-
-                canvas.current?.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, calculatedZoom);
-                opt.e.preventDefault();
-                opt.e.stopPropagation();
-            });
-        }
-    }, []);
+    // useEffect(() => {
+    //     if (!state.canvasObject) {
+    //         dispatch(setCanvas(canvasjjjRef))
+    //     }
+    // }, []);
 
     useEffect(() => {
-        canvas.current?.setDimensions?.({ width, height })
-    }, [width, height])
+        canvasObject?.setDimensions?.({ width, height })
+    }, [width, height, canvasObject])
 
     useEffect(() => {
-        canvas.current && (canvas.current.isDrawingMode = drawingMode)
+        canvasObject && (canvasObject.isDrawingMode = drawingMode)
     }, [drawingMode])
 
     useEffect(() => {
-        loadNonEditable([])
+        if (canvasObject) {
+            loadNonEditable([])
 
-        onGetEventLog().then(objectList => {
-            objectList.forEach(singleObject => loadNonEditable(R.concat(singleObject.objects.map(hash))))
-            const _fabricObject = objectList.reduce((acc, currentObject) => ({ ...acc, ...currentObject, objects: R.concat(acc.objects ?? [], currentObject.objects) }), {})
+            onGetEventLog().then(objectList => {
+                objectList.forEach(singleObject => loadNonEditable(R.concat(singleObject.objects.map(hash))))
+                const _fabricObject = objectList.reduce((acc, currentObject) => ({ ...acc, ...currentObject, objects: R.concat(acc.objects ?? [], currentObject.objects) }), {})
 
-            canvas.current?.loadFromJSON(_fabricObject, () => canvas.current?.renderAll(), function (o: any, object: any) {
-                object.set('selectable', false);
+                canvasObject?.loadFromJSON(_fabricObject, () => canvasObject?.renderAll(), function (o: any, object: any) {
+                    object.set('selectable', false);
+                })
+
             })
-
-        })
-
-    }, [canvasSaver.instance])
+        }
+    }, [canvasSaver.instance, canvasObject])
 
     const onPublishClick = async () => {
         //@ts-ignore
-        const jsonObject: any = R.over(R.lensProp('objects'), R.reject(object => R.find(R.equals(hash(object)), nonEditable)), canvas.current?.toJSON())
+        const jsonObject: any = R.over(R.lensProp('objects'), R.reject(object => R.find(R.equals(hash(object)), nonEditable)), canvasObject.toJSON())
         if (jsonObject.objects.length === 0) {
             warningToast('Nothing to publish')
             return
@@ -99,10 +86,10 @@ const CanvasComponent: FC = () => {
     }
 
     const onClearCanvas = () => {
-        canvas.current?.getObjects().forEach(object => {
+        canvasObject?.getObjects().forEach(object => {
             //@ts-ignore
             if (!R.find(R.equals(hash(object.toJSON())), nonEditable)) {
-                canvas.current?.remove(object)
+                canvasObject?.remove(object)
             }
         })
     }
@@ -124,7 +111,7 @@ const CanvasComponent: FC = () => {
     }
 
     return <>
-        <canvas id="canvas" ref={canvasRef} />
+        <canvas id="canvas" ref={memoRefCallback} />
 
         <ToolboxComponent
             css={{ position: "fixed", bottom: "10px", right: 0, width: 'auto' }}

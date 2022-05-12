@@ -1,8 +1,7 @@
 import { Canvas } from "fabric/fabric-impl"
-import { RefObject } from "react"
 
 export enum ActionType {
-    SetCanvasRef,
+    SetCanvasElement,
     SetCanvasObject,
     SetNonEditable,
     SetBrushColor,
@@ -14,9 +13,9 @@ export interface SetCanvasObject {
     payload: Canvas
 }
 
-export interface SetCanvasRef {
-    type: ActionType.SetCanvasRef
-    payload: RefObject<HTMLCanvasElement>
+export interface SetCanvasElement {
+    type: ActionType.SetCanvasElement
+    payload: HTMLCanvasElement
 }
 
 export interface SetNonEditable {
@@ -34,4 +33,4 @@ export interface SetBrushThickness {
     payload: number
 }
 
-export type CanvasActions = SetCanvasObject | SetCanvasRef | SetNonEditable | SetBrushColor | SetBrushThickness
+export type CanvasActions = SetCanvasObject | SetCanvasElement | SetNonEditable | SetBrushColor | SetBrushThickness
