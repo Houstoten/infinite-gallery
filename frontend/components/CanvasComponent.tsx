@@ -18,7 +18,7 @@ const CanvasComponent: FC = () => {
 
     const { state, dispatch } = useCanvas()
 
-    const { canvasObject, nonEditable } = state
+    const { canvasObject, nonEditable} = state
 
     const [drawingMode, setDrawingMode] = useState<boolean>(false);
 
@@ -27,8 +27,8 @@ const CanvasComponent: FC = () => {
     const { height, width } = useWindowSize()
 
     useEffect(() => {
-        if(canvasObject){
-            setNonEditable(canvasSaver).then(dispatch)
+        if (canvasObject) {
+            setNonEditable(canvasSaver, dispatch).then(dispatch)
         }
     }, [canvasObject, canvasSaver.instance]);
 
@@ -40,8 +40,8 @@ const CanvasComponent: FC = () => {
         canvasObject && (canvasObject.isDrawingMode = drawingMode)
     }, [drawingMode])
 
-    const onPublishClick =  () => {
-       publishCanvasChanges(canvasSaver, nonEditable, canvasObject).then(dispatch)
+    const onPublishClick = () => {
+        publishCanvasChanges(canvasSaver, nonEditable, canvasObject).then(dispatch)
     }
 
     const onClearCanvas = () => {

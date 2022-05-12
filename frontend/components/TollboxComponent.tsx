@@ -1,8 +1,7 @@
-import { FC, useState } from "react";
-import { Button, Grid, Popover, css } from "@nextui-org/react";
+import { FC } from "react";
+import { Button, Grid, Popover } from "@nextui-org/react";
 import EditableToggle from "./EditableToggle";
 import PublishDrawing from "./PublishDrawing";
-// import { SketchPicker } from 'react-color'
 import { HexColorPicker } from "react-colorful";
 import { useCanvas } from "../state/context";
 import { setBrushColor } from "../state/reducer";
@@ -38,7 +37,6 @@ const ToolboxComponent: FC<{
                     <HexColorPicker color={color} onChange={R.compose(dispatch, setBrushColor)} />
                 </Popover.Content>
             </Popover>
-
         </Grid>
     </Grid.Container>
 }

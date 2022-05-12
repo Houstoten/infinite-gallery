@@ -1,5 +1,5 @@
 import { fabric } from "fabric";
-import { ActionType, CanvasActions, SetBrushColor, SetBrushThickness, SetCanvasElement, SetNonEditable, SetPublishCanvasResult } from "./actions";
+import { ActionType, CanvasActions, IncrementSplashLoading, InitSplashLoading, SetBrushColor, SetBrushThickness, SetCanvasElement, SetNonEditable, SetPublishCanvasResult } from "./actions";
 import { CanvasState } from "./state";
 import * as R from 'ramda'
 import { SymfoniCanvasSaver } from "../hardhat/SymfoniContext";
@@ -80,6 +80,39 @@ export const canvasReducer = (state: CanvasState, action: CanvasActions): Canvas
                     thickness: action.payload
                 }
             }
+        case ActionType.InitSplashLoading: {
+            console.log('initLoading!', action.payload)
+            return {
+                ...state,
+                splashLoading: {
+                    initial: action.payload,
+                    progress: 0,
+                    loading: true
+                }
+            }
+        }
+        case ActionType.IncrementSplashLoading:
+            const progress = R.add(state.splashLoading.progress, action.payload)
+
+            if (progress >= state.splashLoading.initial) {
+                return {
+                    ...state,
+                    splashLoading: {
+                        initial: 0,
+                        progress: 0,
+                        loading: false
+                    }
+                }
+            }
+
+            return {
+                ...state,
+                splashLoading: {
+                    initial: state.splashLoading.initial,
+                    progress,
+                    loading: true
+                }
+            }
         default:
             return state
 
@@ -91,9 +124,9 @@ export const setCanvas = (canvasElement: HTMLCanvasElement): SetCanvasElement =>
     payload: canvasElement
 })
 
-export const setNonEditable = async (canvasSaver: SymfoniCanvasSaver): Promise<SetNonEditable> => {
+export const setNonEditable = async (canvasSaver: SymfoniCanvasSaver, dispatch: React.Dispatch<CanvasActions>): Promise<SetNonEditable> => {
 
-    const objectList = await onGetEventLog(canvasSaver)
+    const objectList = await onGetEventLog(canvasSaver, dispatch)
 
     return {
         type: ActionType.SetNonEditable,
@@ -101,9 +134,19 @@ export const setNonEditable = async (canvasSaver: SymfoniCanvasSaver): Promise<S
     }
 }
 
+export const initSplashLoading = (number: number): InitSplashLoading => ({
+    type: ActionType.InitSplashLoading,
+    payload: number
+})
+
+export const incrementSplashLoading = (number: number): IncrementSplashLoading => ({
+    type: ActionType.IncrementSplashLoading,
+    payload: number
+})
+
 export const publishCanvasChanges = async (canvasSaver: SymfoniCanvasSaver, nonEditable: string[], canvasObject?: Canvas): Promise<SetPublishCanvasResult> => {
 
-    if(!canvasObject){
+    if (!canvasObject) {
         warningToast('Canvas is not detected')
     }
     //@ts-ignore

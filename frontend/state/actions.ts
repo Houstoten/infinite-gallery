@@ -6,7 +6,9 @@ export enum ActionType {
     SetNonEditable,
     SetBrushColor,
     SetBrushThickness,
-    SetPublishCanvasResult
+    SetPublishCanvasResult,
+    InitSplashLoading,
+    IncrementSplashLoading
 }
 
 export interface SetCanvasObject {
@@ -39,4 +41,14 @@ export interface SetPublishCanvasResult {
     payload: boolean
 }
 
-export type CanvasActions = SetCanvasObject | SetCanvasElement | SetNonEditable | SetBrushColor | SetBrushThickness | SetPublishCanvasResult
+export interface IncrementSplashLoading {
+    type: ActionType.IncrementSplashLoading
+    payload: number
+}
+
+export interface InitSplashLoading {
+    type: ActionType.InitSplashLoading
+    payload: number
+}
+
+export type CanvasActions = SetCanvasObject | SetCanvasElement | SetNonEditable | SetBrushColor | SetBrushThickness | SetPublishCanvasResult | InitSplashLoading | IncrementSplashLoading

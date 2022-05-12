@@ -15,6 +15,7 @@
     "@types/pako": "^1.0.3",
     "@types/ramda": "^0.28.12",
     "@types/react-color": "^3.0.6",
+    "@types/react-transition-group": "^4.4.4",
     "ethers": "^5.5.1",
     "fabric": "^5.2.1",
     "fabricjs-react": "^1.0.8",
@@ -28,6 +29,7 @@
     "react-dom": "18.1.0",
     "react-hot-toast": "^2.2.0",
     "react-toastify": "^9.0.1",
+    "react-transition-group": "^4.4.2",
     "usehooks-ts": "^2.5.2",
     "web3modal": "^1.9.1"
   },
