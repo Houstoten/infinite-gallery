@@ -8,7 +8,8 @@ export enum ActionType {
     SetBrushThickness,
     SetPublishCanvasResult,
     InitSplashLoading,
-    IncrementSplashLoading
+    IncrementSplashLoading,
+    DeleteSelectedObject
 }
 
 export interface SetCanvasObject {
@@ -51,4 +52,17 @@ export interface InitSplashLoading {
     payload: number
 }
 
-export type CanvasActions = SetCanvasObject | SetCanvasElement | SetNonEditable | SetBrushColor | SetBrushThickness | SetPublishCanvasResult | InitSplashLoading | IncrementSplashLoading
+export interface DeleteSelectedObject {
+    type: ActionType.DeleteSelectedObject
+    payload: null
+}
+
+export type CanvasActions = SetCanvasObject
+    | SetCanvasElement
+    | SetNonEditable
+    | SetBrushColor
+    | SetBrushThickness
+    | SetPublishCanvasResult
+    | InitSplashLoading
+    | IncrementSplashLoading
+    | DeleteSelectedObject

@@ -3,11 +3,15 @@ import type { AppProps } from 'next/app'
 import { Symfoni } from '../hardhat/SymfoniContext'
 import { Toaster } from 'react-hot-toast';
 import { CanvasContextProvider } from '../state/context';
+import SplashScreen from '../components/SplashScreen';
 
 
 function MyApp({ Component, pageProps }: AppProps) {
   //@ts-ignore
-  return <Symfoni autoInit>
+  return <Symfoni
+    autoInit
+    loadingComponent={<SplashScreen indeterminated transition={false} />}
+  >
     <Toaster toastOptions={{
       className: '',
       style: {

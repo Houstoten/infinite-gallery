@@ -6,8 +6,6 @@ import CanvasComponent from '../components/CanvasComponent';
 import SplashScreen from '../components/SplashScreen';
 
 const Home: NextPage = () => {
-
-
   return (
     <div className={styles.container}>
       <Head>

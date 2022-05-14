@@ -1,5 +1,5 @@
 import { fabric } from "fabric";
-import { ActionType, CanvasActions, IncrementSplashLoading, InitSplashLoading, SetBrushColor, SetBrushThickness, SetCanvasElement, SetNonEditable, SetPublishCanvasResult } from "./actions";
+import { ActionType, CanvasActions, DeleteSelectedObject, IncrementSplashLoading, InitSplashLoading, SetBrushColor, SetBrushThickness, SetCanvasElement, SetNonEditable, SetPublishCanvasResult } from "./actions";
 import { CanvasState } from "./state";
 import * as R from 'ramda'
 import { SymfoniCanvasSaver } from "../hardhat/SymfoniContext";
@@ -113,6 +113,12 @@ export const canvasReducer = (state: CanvasState, action: CanvasActions): Canvas
                     loading: true
                 }
             }
+        case ActionType.DeleteSelectedObject:{
+            if(state.canvasObject){
+                 state.canvasObject.getActiveObjects().forEach(obj=> state.canvasObject && state.canvasObject.remove(obj))
+            }
+            return state
+        }
         default:
             return state
 
@@ -191,4 +197,9 @@ export const setBrushColor = (color: string): SetBrushColor => ({
 export const setBrushThickness = (thickness: number): SetBrushThickness => ({
     type: ActionType.SetBrushThickness,
     payload: thickness
+})
+
+export const deleteSelectedObject = (): DeleteSelectedObject => ({
+    type: ActionType.DeleteSelectedObject,
+    payload: null
 })

@@ -4,12 +4,15 @@ import { Progress } from '@nextui-org/react';
 import { CSSTransition } from 'react-transition-group';
 import styles from '../styles/Home.module.css'
 
-const SplashScreen: FC = () => {
+const SplashScreen: FC<{indeterminated?: boolean, transition?: boolean}> = ({indeterminated = false, transition = true}) => {
     const { state } = useCanvas()
 
     const { splashLoading: { initial: splashInitial, progress: splashProgress, loading: splashLoading } } = state
 
+    const _indeterminated = indeterminated || (splashLoading && !splashInitial)
+
     return <CSSTransition
+
         in={splashLoading}
         unmountOnExit
         classNames={{
@@ -18,7 +21,7 @@ const SplashScreen: FC = () => {
             exit: styles.splashExit,
             exitActive: styles.splashExitActive
         }}
-        timeout={1000}
+        timeout={transition ? 1000 : 0}
     >
         <div style={{
             position: 'absolute',

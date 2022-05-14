@@ -8,7 +8,7 @@ import { CanvasSaverContext } from "../hardhat/SymfoniContext";
 import hash from 'hash-it';
 import toast from 'react-hot-toast';
 import { useCanvas } from "../state/context";
-import { publishCanvasChanges, setCanvas, setNonEditable } from "../state/reducer";
+import { deleteSelectedObject, publishCanvasChanges, setCanvas, setNonEditable } from "../state/reducer";
 
 const warningToast = (text: string) => toast(text, { icon: "⚠️" })
 
@@ -25,6 +25,16 @@ const CanvasComponent: FC = () => {
     const memoRefCallback = useCallback(R.compose(dispatch, setCanvas), [])
 
     const { height, width } = useWindowSize()
+
+    useEffect(() => {
+
+        const onDelHandler = R.when(R.propEq('key', 'Delete'), () => dispatch(deleteSelectedObject()))
+
+        document.addEventListener('keydown', onDelHandler)
+
+        return () => document.removeEventListener('keydown', onDelHandler)
+        
+    }, [])
 
     useEffect(() => {
         if (canvasObject) {
