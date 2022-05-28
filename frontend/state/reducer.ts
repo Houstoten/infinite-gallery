@@ -87,7 +87,7 @@ export const canvasReducer = (state: CanvasState, action: CanvasActions): Canvas
                 splashLoading: {
                     initial: action.payload,
                     progress: 0,
-                    loading: true
+                    loading: !!action.payload
                 }
             }
         }
