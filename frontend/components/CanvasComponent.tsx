@@ -4,11 +4,13 @@ import ToolboxComponent from "./TollboxComponent";
 import * as R from 'ramda'
 import { PinataPinResponse } from "@pinata/sdk";
 import Pako from "pako";
-import { CanvasSaverContext } from "../hardhat/SymfoniContext";
+import { CanvasSaverContext, CanvasNFTContext } from "../hardhat/SymfoniContext";
 import hash from 'hash-it';
 import toast from 'react-hot-toast';
 import { useCanvas } from "../state/context";
-import { deleteSelectedObject, publishCanvasChanges, setCanvas, setNonEditable } from "../state/reducer";
+import { deleteSelectedObject, publishCanvasChanges, publishNFTItem, setCanvas, setNonEditable } from "../state/reducer";
+import { fabric } from "fabric";
+import { ethers } from "ethers";
 
 const warningToast = (text: string) => toast(text, { icon: "⚠️" })
 
@@ -16,9 +18,11 @@ const CanvasComponent: FC = () => {
 
     const canvasSaver = useContext(CanvasSaverContext)
 
+    const canvasNFT = useContext(CanvasNFTContext)
+
     const { state, dispatch } = useCanvas()
 
-    const { canvasObject, nonEditable} = state
+    const { canvasObject, nonEditable } = state
 
     const [drawingMode, setDrawingMode] = useState<boolean>(false);
 
@@ -33,7 +37,7 @@ const CanvasComponent: FC = () => {
         document.addEventListener('keydown', onDelHandler)
 
         return () => document.removeEventListener('keydown', onDelHandler)
-        
+
     }, [])
 
     useEffect(() => {
@@ -54,6 +58,10 @@ const CanvasComponent: FC = () => {
         publishCanvasChanges(canvasSaver, nonEditable, canvasObject).then(dispatch)
     }
 
+    const onGroupClick = () => {
+        publishNFTItem(canvasNFT, nonEditable, canvasObject).then(dispatch)
+    }
+
     const onClearCanvas = () => {
         canvasObject?.getObjects().forEach(object => {
             //@ts-ignore
@@ -72,6 +80,7 @@ const CanvasComponent: FC = () => {
             setEditable={setDrawingMode}
             onPublishClick={onPublishClick}
             onClearCanvas={onClearCanvas}
+            onPublishNFT={onGroupClick}
         />
     </>
 }

@@ -6,7 +6,7 @@ import { CanvasActions } from "../state/actions"
 import { incrementSplashLoading, initSplashLoading } from "../state/reducer"
 
 export const getIPFSFabricJSON = async (ipfsHash: string) => {
-    const responseArrayBuffer = await fetch("https://ipfs.io/ipfs/" + ipfsHash).then(data => data.blob()).then(blob => blob.arrayBuffer())
+    const responseArrayBuffer = await fetch("https://gateway.pinata.cloud/ipfs/" + ipfsHash).then(data => data.blob()).then(blob => blob.arrayBuffer())
     const responseUInt8Array = new Uint8Array(responseArrayBuffer)
 
     await new Promise(res => {
@@ -18,7 +18,7 @@ export const getIPFSFabricJSON = async (ipfsHash: string) => {
 
 export const onGetEventLog = async (canvasSaver: SymfoniCanvasSaver, dispatch: React.Dispatch<CanvasActions>) => {
     if (canvasSaver.instance) {
-        const eventData: any = await canvasSaver.instance.queryFilter(canvasSaver.instance.filters.SaveToLog(null, null))
+        const eventData: any = await canvasSaver.factory?.attach("0xcA42f458a4Eb533fD16203AbbABf9630E8987FCE").queryFilter(canvasSaver.instance.filters.SaveToLog(null, null))
 
         await dispatch(initSplashLoading(eventData.length))
 

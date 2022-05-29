@@ -5,3 +5,5 @@ cache
 artifacts
 frontend/src/hardhat
 frontend-next/src/hardhat
+
+.env

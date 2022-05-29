@@ -5,6 +5,7 @@ import 'hardhat-deploy';
 import '@symfoni/hardhat-react';
 import 'hardhat-typechain';
 import '@typechain/ethers-v5';
+require("dotenv").config()
 
 import { HardhatUserConfig, task } from 'hardhat/config';
 
@@ -34,20 +35,12 @@ const config: HardhatUserConfig = {
   typechain: {
     "outDir": "./frontend/hardhat/typechain",
     "target": "ethers-v5"
-  },
+  },   
+  defaultNetwork: "rinkeby",
   networks: {
-    hardhat: {
-      chainId: 1337,
-      inject: false, // optional. If true, it will EXPOSE your mnemonic in your frontend code. Then it would be available as an "in-page browser wallet" / signer which can sign without confirmation.
-      accounts: [
-        {
-          balance: "10000000000000000000000",
-          privateKey:
-            "0xe87d780e4c31c953a68aef2763df56599c9cfe73df4740fc24c2d0f5acd21bae",
-        },
-      ],
-    },
     // hardhat: {
+    //   chainId: 1337,
+    //   inject: false, // optional. If true, it will EXPOSE your mnemonic in your frontend code. Then it would be available as an "in-page browser wallet" / signer which can sign without confirmation.
     //   accounts: [
     //     {
     //       balance: "10000000000000000000000",
@@ -56,6 +49,11 @@ const config: HardhatUserConfig = {
     //     },
     //   ],
     // },
+      hardhat: {},
+      rinkeby: {
+         url: process.env.ALCHEMY_RINKEBY_URL,
+         accounts: [`0x${process.env.PRIVATE_KEY}`]
+      }
   },
   solidity: {
     compilers: [

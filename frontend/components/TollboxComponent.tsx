@@ -13,7 +13,8 @@ const ToolboxComponent: FC<{
     setEditable: (editable: boolean) => void,
     onPublishClick: () => void,
     onClearCanvas: () => void,
-}> = ({ css, editable, setEditable, onPublishClick, onClearCanvas }) => {
+    onPublishNFT: () => void
+}> = ({ css, editable, setEditable, onPublishClick, onClearCanvas, onPublishNFT }) => {
     const { state, dispatch } = useCanvas()
 
     const { brush: { color } } = state
@@ -24,6 +25,9 @@ const ToolboxComponent: FC<{
         </Grid>
         <Grid alignItems="center" css={{ display: 'flex' }}>
             <PublishDrawing onPublishClick={onPublishClick} />
+        </Grid>
+        <Grid alignItems="center" css={{ display: 'flex' }}>
+            <Button onClick={onPublishNFT}>Publish as NFT</Button>
         </Grid>
         <Grid alignItems="center" css={{ display: 'flex' }}>
             <Button onClick={onClearCanvas}>Clear Canvas</Button>

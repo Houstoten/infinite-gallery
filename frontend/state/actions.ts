@@ -9,7 +9,8 @@ export enum ActionType {
     SetPublishCanvasResult,
     InitSplashLoading,
     IncrementSplashLoading,
-    DeleteSelectedObject
+    DeleteSelectedObject,
+    SetPublishNFTResult
 }
 
 export interface SetCanvasObject {
@@ -42,6 +43,11 @@ export interface SetPublishCanvasResult {
     payload: boolean
 }
 
+export interface SetPublishNFTResult {
+    type: ActionType.SetPublishNFTResult
+    payload: boolean
+}
+
 export interface IncrementSplashLoading {
     type: ActionType.IncrementSplashLoading
     payload: number
@@ -63,6 +69,7 @@ export type CanvasActions = SetCanvasObject
     | SetBrushColor
     | SetBrushThickness
     | SetPublishCanvasResult
+    | SetPublishNFTResult
     | InitSplashLoading
     | IncrementSplashLoading
     | DeleteSelectedObject

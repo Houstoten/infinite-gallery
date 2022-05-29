@@ -1,14 +1,19 @@
 import { fabric } from "fabric";
-import { ActionType, CanvasActions, DeleteSelectedObject, IncrementSplashLoading, InitSplashLoading, SetBrushColor, SetBrushThickness, SetCanvasElement, SetNonEditable, SetPublishCanvasResult } from "./actions";
+import { ActionType, CanvasActions, DeleteSelectedObject, IncrementSplashLoading, InitSplashLoading, SetBrushColor, SetBrushThickness, SetCanvasElement, SetNonEditable, SetPublishCanvasResult, SetPublishNFTResult } from "./actions";
 import { CanvasState } from "./state";
 import * as R from 'ramda'
-import { SymfoniCanvasSaver } from "../hardhat/SymfoniContext";
+import { SymfoniCanvasNFT, SymfoniCanvasSaver } from "../hardhat/SymfoniContext";
 import { onGetEventLog } from "../utils/loadCanvasDataUtils";
 import hash from 'hash-it';
 import { warningToast } from "../utils/toastUtils";
 import toast from "react-hot-toast";
 import { PinataPinResponse } from "@pinata/sdk";
 import { Canvas } from "fabric/fabric-impl";
+import { ethers } from "ethers";
+
+const canvasSaverAddress = process.env.NEXT_PUBLIC_CANVAS_SAVER_ADDRESS || ""
+const canvasNFTAddress = process.env.NEXT_PUBLIC_CANVAS_NFT_ADDRESS || ""
+const pinataGatewayPrefix = process.env.NEXT_PUBLIC_PINATA_PREFIX || ""
 
 export const canvasReducer = (state: CanvasState, action: CanvasActions): CanvasState => {
     switch (action.type) {
@@ -81,7 +86,6 @@ export const canvasReducer = (state: CanvasState, action: CanvasActions): Canvas
                 }
             }
         case ActionType.InitSplashLoading: {
-            console.log('initLoading!', action.payload)
             return {
                 ...state,
                 splashLoading: {
@@ -113,9 +117,9 @@ export const canvasReducer = (state: CanvasState, action: CanvasActions): Canvas
                     loading: true
                 }
             }
-        case ActionType.DeleteSelectedObject:{
-            if(state.canvasObject){
-                 state.canvasObject.getActiveObjects().forEach(obj=> state.canvasObject && state.canvasObject.remove(obj))
+        case ActionType.DeleteSelectedObject: {
+            if (state.canvasObject) {
+                state.canvasObject.getActiveObjects().forEach(obj => state.canvasObject && state.canvasObject.remove(obj))
             }
             return state
         }
@@ -176,8 +180,7 @@ export const publishCanvasChanges = async (canvasSaver: SymfoniCanvasSaver, nonE
         body: JSON.stringify(jsonObject)
     }).then(data => data.json() as Promise<PinataPinResponse>)
 
-
-    await canvasSaver.instance?.saveCanvasItem(IpfsHash).then(() => {
+    await canvasSaver.factory?.attach(canvasSaverAddress).saveCanvasItem(IpfsHash).then(() => {
         toast.success('Transaction succeed', {
             id: toastId,
         });
@@ -187,6 +190,43 @@ export const publishCanvasChanges = async (canvasSaver: SymfoniCanvasSaver, nonE
         type: ActionType.SetPublishCanvasResult,
         payload: true
     }
+}
+
+export const publishNFTItem = async (canvasNFT: SymfoniCanvasNFT, nonEditable: string[], canvasObject?: Canvas): Promise<SetPublishNFTResult> => {
+
+    if (!canvasObject) {
+        warningToast('Canvas is not detected')
+    }
+
+    //@ts-ignore
+    const canvasObjectItems: any = R.reject((obj: fabric.Object) => R.find(R.equals(hash(obj.toJSON())), nonEditable), canvasObject?.getObjects())
+
+    const group = new fabric.Group(canvasObjectItems, { originX: 'center', originY: 'center' })
+
+    const groupURI = group.toDataURL({})
+
+    const pinResponse = await fetch("/api/pinNFT", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            imgURI: groupURI,
+            groupJson: group.toJSON()
+        })
+    }).then(data => data.json() as Promise<PinataPinResponse>)
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+    const signerAddress = await provider.getSigner().getAddress();
+
+    await canvasNFT.factory?.attach(canvasNFTAddress).mintNFT(signerAddress, pinataGatewayPrefix + pinResponse.IpfsHash)
+
+    return {
+        type: ActionType.SetPublishNFTResult,
+        payload: true
+    }
+
 }
 
 export const setBrushColor = (color: string): SetBrushColor => ({
