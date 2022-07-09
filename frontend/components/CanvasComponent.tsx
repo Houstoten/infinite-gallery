@@ -8,13 +8,14 @@ import { CanvasSaverContext, CanvasNFTContext } from "../hardhat/SymfoniContext"
 import hash from 'hash-it';
 import toast from 'react-hot-toast';
 import { useCanvas } from "../state/context";
-import { deleteSelectedObject, publishCanvasChanges, publishNFTItem, setCanvas, setNonEditable } from "../state/reducer";
+import { deleteSelectedObject, publishCanvasChanges, publishNFTItem, setCanvas, setNFTs, setNonEditable } from "../state/reducer";
 import { fabric } from "fabric";
 import { ethers } from "ethers";
+import { CanvasNFT } from "../hardhat/typechain";
 
 const warningToast = (text: string) => toast(text, { icon: "⚠️" })
 
-const CanvasComponent: FC = () => {
+const CanvasComponent: FC<{nftList: any[]}> = ({nftList}) => {
 
     const canvasSaver = useContext(CanvasSaverContext)
 
@@ -41,6 +42,12 @@ const CanvasComponent: FC = () => {
     }, [])
 
     useEffect(() => {
+        if(canvasObject && nftList) {
+            dispatch(setNFTs(nftList))
+        }
+    }, [canvasObject, nftList])
+
+    useEffect(() => {
         if (canvasObject) {
             setNonEditable(canvasSaver, dispatch).then(dispatch)
         }
@@ -65,7 +72,7 @@ const CanvasComponent: FC = () => {
     const onClearCanvas = () => {
         canvasObject?.getObjects().forEach(object => {
             //@ts-ignore
-            if (!R.find(R.equals(hash(object.toJSON())), nonEditable)) {
+            if (!object.inBlockchain) {
                 canvasObject?.remove(object)
             }
         })

@@ -4,6 +4,7 @@ export interface CanvasState {
     canvasObject?: Canvas
     canvasElement?: HTMLCanvasElement
     nonEditable: string[]
+    nfts: {}[]
     brush: Brush
     splashLoading: SplashLoading
 }
@@ -21,6 +22,7 @@ export interface Brush {
 
 export const initialCanvasState: CanvasState = {
     nonEditable: [],
+    nfts: [],
     brush: {
         color: "#b32aa9",
         thickness: 5

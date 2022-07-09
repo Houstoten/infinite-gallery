@@ -1,11 +1,35 @@
 import React from 'react'
-import type { NextPage } from 'next'
+import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import CanvasComponent from '../components/CanvasComponent';
 import SplashScreen from '../components/SplashScreen';
+import * as R from 'ramda'
 
-const Home: NextPage = () => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+
+  const moralisApiKey = process.env.MORALIS_API_KEY || "";
+
+  const nftContractAddress = process.env.NEXT_PUBLIC_CANVAS_NFT_ADDRESS || "";
+
+  console.log({nftContractAddress, moralisApiKey})
+
+  const {result: suppliedNfts} = await fetch(`https://deep-index.moralis.io/api/v2/nft/${nftContractAddress}?format=decimal&chain=rinkeby`,
+    {
+      headers: {
+        "x-api-key": moralisApiKey
+      }
+    }).then(response => response.json())
+
+    const mappedSuppliedNFTs = R.map(R.over(R.lensProp('metadata'), JSON.parse), suppliedNfts)
+
+    const nftList = R.reject(R.compose(R.isNil, R.path(['metadata', 'objectData'])), mappedSuppliedNFTs)
+
+  return {
+    props: { nftList } 
+  }
+}
+const Home: NextPage<{nftList: any[]}> = ({nftList})=> {
   return (
     <div className={styles.container}>
       <Head>
@@ -14,7 +38,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <SplashScreen />
-      <CanvasComponent />
+      <CanvasComponent nftList={nftList} />
     </div>
   )
 }

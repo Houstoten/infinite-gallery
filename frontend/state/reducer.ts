@@ -1,5 +1,5 @@
 import { fabric } from "fabric";
-import { ActionType, CanvasActions, DeleteSelectedObject, IncrementSplashLoading, InitSplashLoading, SetBrushColor, SetBrushThickness, SetCanvasElement, SetNonEditable, SetPublishCanvasResult, SetPublishNFTResult } from "./actions";
+import { ActionType, CanvasActions, DeleteSelectedObject, IncrementSplashLoading, InitSplashLoading, SetBrushColor, SetBrushThickness, SetCanvasElement, SetNFT, SetNonEditable, SetPublishCanvasResult, SetPublishNFTResult } from "./actions";
 import { CanvasState } from "./state";
 import * as R from 'ramda'
 import { SymfoniCanvasNFT, SymfoniCanvasSaver } from "../hardhat/SymfoniContext";
@@ -52,19 +52,45 @@ export const canvasReducer = (state: CanvasState, action: CanvasActions): Canvas
         }
         case ActionType.SetNonEditable: {
 
-            const objectList = action.payload
+            const objectList = action.payload.reduce((acc, singleObject) => [...acc, ...singleObject.objects], [])
 
-            const nonEditable: string[] = objectList.reduce((acc, singleObject) => [...acc, ...singleObject.objects.map(hash)], [])
+            const nonEditable: string[] = objectList.map(hash)
 
-            const _fabricObject = objectList.reduce((acc, currentObject) => ({ ...acc, ...currentObject, objects: R.concat(acc.objects ?? [], currentObject.objects) }), {})
-
-            state.canvasObject?.loadFromJSON(_fabricObject, () => state.canvasObject?.renderAll(), function (o: any, object: any) {
-                object.set('selectable', false);
-            })
+            fabric.util.enlivenObjects(objectList, (enlivendedObjects: fabric.Object[]) => {
+                enlivendedObjects.forEach(obj => {
+                    //@ts-ignore
+                    obj.inBlockchain = true
+                    obj.set('selectable', false)
+                    state.canvasObject?.add(obj)
+                })
+                state.canvasObject?.renderAll()
+            }, "")
 
             return {
                 ...state,
                 nonEditable: nonEditable
+            }
+        }
+        case ActionType.SetNFT: {
+
+            fabric.util.enlivenObjects(action.payload.map(R.path(['metadata', 'objectData'])), (enlivendedObjects: fabric.Group[]) => {
+                enlivendedObjects.forEach(obj => {
+                    //@ts-ignore
+                    obj.inBlockchain = true
+                    obj.set('selectable', false)
+                    state.canvasObject?.add(obj)
+                })
+                state.canvasObject?.renderAll()
+            }, "")
+            // action.payload.forEach(({ metadata: { objectData } }) => state.canvasObject?.add(objectData))
+            // action.payload.forEach(({metadata: {objectData}}) => state.canvasObject?.loadFromJSON(JSON.stringify(objectData), () => {}))
+
+            // action.payload.forEach(({metadata: {objectData}}) => console.log(objectData))
+            // action.payload.forEach(({objectData}) => console.log(objectData))
+
+            return {
+                ...state,
+                nfts: action.payload
             }
         }
         case ActionType.SetBrushColor: {
@@ -144,6 +170,11 @@ export const setNonEditable = async (canvasSaver: SymfoniCanvasSaver, dispatch: 
     }
 }
 
+export const setNFTs = (nfts: {}[]): SetNFT => ({
+    type: ActionType.SetNFT,
+    payload: nfts
+})
+
 export const initSplashLoading = (number: number): InitSplashLoading => ({
     type: ActionType.InitSplashLoading,
     payload: number
@@ -160,7 +191,7 @@ export const publishCanvasChanges = async (canvasSaver: SymfoniCanvasSaver, nonE
         warningToast('Canvas is not detected')
     }
     //@ts-ignore
-    const jsonObject: any = R.over(R.lensProp('objects'), R.reject(object => R.find(R.equals(hash(object)), nonEditable)), canvasObject.toJSON())
+    const jsonObject: any = R.over(R.lensProp('objects'), R.reject(object => object.inBlockchain), canvasObject.toJSON(['inBlockchain']))
     if (jsonObject.objects.length === 0) {
         warningToast('Nothing to publish')
         return {
@@ -199,7 +230,15 @@ export const publishNFTItem = async (canvasNFT: SymfoniCanvasNFT, nonEditable: s
     }
 
     //@ts-ignore
-    const canvasObjectItems: any = R.reject((obj: fabric.Object) => R.find(R.equals(hash(obj.toJSON())), nonEditable), canvasObject?.getObjects())
+    const canvasObjectItems: any = R.reject((obj: fabric.Object) => obj.inBlockchain, canvasObject?.getObjects())
+
+    if (canvasObjectItems.length === 0) {
+        warningToast('Nothing to publish')
+        return {
+            type: ActionType.SetPublishNFTResult,
+            payload: true
+        }
+    }
 
     const group = new fabric.Group(canvasObjectItems, { originX: 'center', originY: 'center' })
 

@@ -4,6 +4,7 @@ export enum ActionType {
     SetCanvasElement,
     SetCanvasObject,
     SetNonEditable,
+    SetNFT,
     SetBrushColor,
     SetBrushThickness,
     SetPublishCanvasResult,
@@ -25,6 +26,11 @@ export interface SetCanvasElement {
 
 export interface SetNonEditable {
     type: ActionType.SetNonEditable
+    payload: any[]
+}
+
+export interface SetNFT {
+    type: ActionType.SetNFT
     payload: any[]
 }
 
@@ -66,6 +72,7 @@ export interface DeleteSelectedObject {
 export type CanvasActions = SetCanvasObject
     | SetCanvasElement
     | SetNonEditable
+    | SetNFT
     | SetBrushColor
     | SetBrushThickness
     | SetPublishCanvasResult
