@@ -82,11 +82,6 @@ export const canvasReducer = (state: CanvasState, action: CanvasActions): Canvas
                 })
                 state.canvasObject?.renderAll()
             }, "")
-            // action.payload.forEach(({ metadata: { objectData } }) => state.canvasObject?.add(objectData))
-            // action.payload.forEach(({metadata: {objectData}}) => state.canvasObject?.loadFromJSON(JSON.stringify(objectData), () => {}))
-
-            // action.payload.forEach(({metadata: {objectData}}) => console.log(objectData))
-            // action.payload.forEach(({objectData}) => console.log(objectData))
 
             return {
                 ...state,
