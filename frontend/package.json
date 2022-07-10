@@ -2,7 +2,6 @@
   "name": "infinite-gallery",
   "version": "0.1.0",
   "private": true,
-
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -19,9 +18,10 @@
     "@types/react-transition-group": "^4.4.4",
     "base64-to-uint8array": "^1.0.0",
     "ethers": "^5.5.1",
-    "fabric": "^5.2.1",
+    "fabric-pure-browser": "^5.1.0",
     "fabricjs-react": "^1.0.8",
     "hash-it": "^5.0.2",
+    "jsdom": "^20.0.0",
     "next": "12.1.6",
     "node-fetch": "^3.0.0-beta.10",
     "pako": "^2.0.4",

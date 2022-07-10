@@ -1,10 +1,9 @@
-import { fabric } from "fabric";
+//@ts-ignore
+import { fabric } from "fabric-pure-browser";
 import { ActionType, CanvasActions, DeleteSelectedObject, IncrementSplashLoading, InitSplashLoading, SetBrushColor, SetBrushThickness, SetCanvasElement, SetNFT, SetNonEditable, SetPublishCanvasResult, SetPublishNFTResult } from "./actions";
 import { CanvasState } from "./state";
 import * as R from 'ramda'
 import { SymfoniCanvasNFT, SymfoniCanvasSaver } from "../hardhat/SymfoniContext";
-import { onGetEventLog } from "../utils/loadCanvasDataUtils";
-import hash from 'hash-it';
 import { warningToast } from "../utils/toastUtils";
 import toast from "react-hot-toast";
 import { PinataPinResponse } from "@pinata/sdk";
