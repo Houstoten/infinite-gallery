@@ -54,8 +54,6 @@ export const canvasReducer = (state: CanvasState, action: CanvasActions): Canvas
 
             const objectList = action.payload.reduce((acc, singleObject) => [...acc, ...singleObject.objects], [])
 
-            const nonEditable: string[] = objectList.map(hash)
-
             fabric.util.enlivenObjects(objectList, (enlivendedObjects: fabric.Object[]) => {
                 enlivendedObjects.forEach(obj => {
                     //@ts-ignore
@@ -68,17 +66,44 @@ export const canvasReducer = (state: CanvasState, action: CanvasActions): Canvas
 
             return {
                 ...state,
-                nonEditable: nonEditable
+                nonEditable: objectList
             }
         }
         case ActionType.SetNFT: {
 
             fabric.util.enlivenObjects(action.payload.map(R.path(['metadata', 'objectData'])), (enlivendedObjects: fabric.Group[]) => {
-                enlivendedObjects.forEach(obj => {
+                enlivendedObjects.forEach((obj, index) => {
+                    //https://github.com/fabricjs/fabric.js/issues/4978
+                    const groupBoundingRect = obj.getBoundingRect()
+
+                    const background = new fabric.Rect({
+                        top: groupBoundingRect.top - 20,
+                        left: groupBoundingRect.left - 20,
+                        width: groupBoundingRect.width + 40,
+                        height: groupBoundingRect.height + 40,
+                        // stroke: 'black',
+                        // strokeWidth: 2,
+                        fill: 'white',
+                        rx: 10,
+                        ry: 10,
+                        shadow: new fabric.Shadow({color: 'black', blur: 20})
+                    })
+
+                    const group = new fabric.Group([background, obj])
+
+                //     group.on('mouseover', e => {
+                //         //@ts-ignore
+                //         e.target?._objects?.[0]?.animate('shadow.blur', 20, {easing: fabric.util.ease.easeOutCubic, duration: 2000, onChange: () => state.canvasObject?.renderAll()})
+                //         state.canvasObject?.renderAll()
+                // })
+
                     //@ts-ignore
-                    obj.inBlockchain = true
-                    obj.set('selectable', false)
-                    state.canvasObject?.add(obj)
+                    group.inBlockchain = true
+                    //@ts-ignore
+                    group.tokenId = action.payload[index].token_id
+                    group.set('selectable', false)
+
+                    state.canvasObject?.add(group)
                 })
                 state.canvasObject?.renderAll()
             }, "")
@@ -180,7 +205,7 @@ export const incrementSplashLoading = (number: number): IncrementSplashLoading =
     payload: number
 })
 
-export const publishCanvasChanges = async (canvasSaver: SymfoniCanvasSaver, nonEditable: string[], canvasObject?: Canvas): Promise<SetPublishCanvasResult> => {
+export const publishCanvasChanges = async (canvasSaver: SymfoniCanvasSaver, canvasObject?: Canvas): Promise<SetPublishCanvasResult> => {
 
     if (!canvasObject) {
         warningToast('Canvas is not detected')
@@ -218,7 +243,7 @@ export const publishCanvasChanges = async (canvasSaver: SymfoniCanvasSaver, nonE
     }
 }
 
-export const publishNFTItem = async (canvasNFT: SymfoniCanvasNFT, nonEditable: string[], canvasObject?: Canvas): Promise<SetPublishNFTResult> => {
+export const publishNFTItem = async (canvasNFT: SymfoniCanvasNFT, canvasObject?: Canvas): Promise<SetPublishNFTResult> => {
 
     if (!canvasObject) {
         warningToast('Canvas is not detected')

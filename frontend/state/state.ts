@@ -3,8 +3,8 @@ import { Canvas } from "fabric/fabric-impl"
 export interface CanvasState {
     canvasObject?: Canvas
     canvasElement?: HTMLCanvasElement
-    nonEditable: string[]
-    nfts: {}[]
+    nonEditable: any[]
+    nfts: any[]
     brush: Brush
     splashLoading: SplashLoading
 }

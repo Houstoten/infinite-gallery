@@ -12,8 +12,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const nftContractAddress = process.env.NEXT_PUBLIC_CANVAS_NFT_ADDRESS || "";
 
-  console.log({nftContractAddress, moralisApiKey})
-
   const {result: suppliedNfts} = await fetch(`https://deep-index.moralis.io/api/v2/nft/${nftContractAddress}?format=decimal&chain=rinkeby`,
     {
       headers: {
