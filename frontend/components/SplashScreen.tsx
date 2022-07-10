@@ -3,7 +3,7 @@ import { Progress } from '@nextui-org/react';
 import { CSSTransition } from 'react-transition-group';
 import styles from '../styles/Home.module.css'
 
-const SplashScreen: FC<{indeterminated?: boolean, transition?: boolean, promise: Promise<any>}> = ({indeterminated = true, transition = true, promise}) => {
+const SplashScreen: FC<{indeterminated?: boolean, transition?: boolean, promise?: Promise<any>}> = ({indeterminated = false, transition = true, promise}) => {
     const [loading, setLoading] = useState<boolean>(true)
 
     useEffect(() => {
@@ -12,7 +12,7 @@ const SplashScreen: FC<{indeterminated?: boolean, transition?: boolean, promise:
 
     return <CSSTransition
 
-        in={loading}
+        in={indeterminated || loading}
         unmountOnExit
         classNames={{
             enter: styles.splashEnter,
@@ -33,11 +33,9 @@ const SplashScreen: FC<{indeterminated?: boolean, transition?: boolean, promise:
             zIndex: 1000000
         }}>
             <Progress
-                indeterminated={indeterminated}
+                indeterminated={true}
                 css={{ width: 400 }}
-                // max={splashLoading ? splashInitial : 10}
                 color="primary"
-                // value={splashLoading ? splashProgress : 10}
             />
         </div>
     </CSSTransition>

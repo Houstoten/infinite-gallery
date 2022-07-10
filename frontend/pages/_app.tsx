@@ -10,7 +10,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   //@ts-ignore
   return <Symfoni
     autoInit
-    loadingComponent={<SplashScreen indeterminated transition={false} />}
+    loadingComponent={<SplashScreen indeterminated/>}
   >
     <Toaster toastOptions={{
       className: '',
