@@ -26,6 +26,7 @@ export const canvasReducer = (state: CanvasState, action: CanvasActions): Canvas
             canvasObject.freeDrawingBrush.color = state.brush.color
             canvasObject.freeDrawingBrush.width = state.brush.thickness
 
+            //@ts-ignore
             canvasObject.on('mouse:wheel', function (opt) {
                 const delta = opt.e.deltaY;
                 const zoom = canvasObject.getZoom() ?? 0;
