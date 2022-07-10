@@ -10,7 +10,7 @@ import Script from 'next/script'
 
 const warningToast = (text: string) => toast(text, { icon: "⚠️" })
 
-const CanvasComponent: FC<{ nftList: any[] }> = ({ nftList }) => {
+const CanvasComponent: FC<{ nftList: any[], drawingList: any[] }> = ({ nftList, drawingList }) => {
 
     const canvasSaver = useContext(CanvasSaverContext)
 
@@ -68,10 +68,10 @@ const CanvasComponent: FC<{ nftList: any[] }> = ({ nftList }) => {
     }, [canvasObject, nftList])
 
     useEffect(() => {
-        if (canvasObject) {
-            setNonEditable(canvasSaver, dispatch).then(dispatch)
-        }
-    }, [canvasObject, canvasSaver.instance]);
+        // if (canvasObject) {
+        dispatch(setNonEditable(drawingList))
+        // }
+    }, [drawingList]);
 
     useEffect(() => {
         canvasObject?.setDimensions?.({ width, height })

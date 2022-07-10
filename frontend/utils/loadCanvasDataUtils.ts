@@ -6,12 +6,8 @@ import { CanvasActions } from "../state/actions"
 import { incrementSplashLoading, initSplashLoading } from "../state/reducer"
 
 export const getIPFSFabricJSON = async (ipfsHash: string) => {
-    const responseArrayBuffer = await fetch("https://gateway.pinata.cloud/ipfs/" + ipfsHash).then(data => data.blob()).then(blob => blob.arrayBuffer())
+    const responseArrayBuffer = await fetch("https://ipfs.moralis.io:2053/ipfs/" + ipfsHash).then(data => data.blob()).then(blob => blob.arrayBuffer())
     const responseUInt8Array = new Uint8Array(responseArrayBuffer)
-
-    await new Promise(res => {
-        setTimeout(res, Math.random() * 3000);
-    })
 
     return JSON.parse(Pako.inflate(responseUInt8Array, { to: 'string' }))
 }

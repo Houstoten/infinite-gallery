@@ -86,16 +86,16 @@ export const canvasReducer = (state: CanvasState, action: CanvasActions): Canvas
                         fill: 'white',
                         rx: 10,
                         ry: 10,
-                        shadow: new fabric.Shadow({color: 'black', blur: 20})
+                        shadow: new fabric.Shadow({ color: 'black', blur: 20 })
                     })
 
                     const group = new fabric.Group([background, obj])
 
-                //     group.on('mouseover', e => {
-                //         //@ts-ignore
-                //         e.target?._objects?.[0]?.animate('shadow.blur', 20, {easing: fabric.util.ease.easeOutCubic, duration: 2000, onChange: () => state.canvasObject?.renderAll()})
-                //         state.canvasObject?.renderAll()
-                // })
+                    //     group.on('mouseover', e => {
+                    //         //@ts-ignore
+                    //         e.target?._objects?.[0]?.animate('shadow.blur', 20, {easing: fabric.util.ease.easeOutCubic, duration: 2000, onChange: () => state.canvasObject?.renderAll()})
+                    //         state.canvasObject?.renderAll()
+                    // })
 
                     //@ts-ignore
                     group.inBlockchain = true
@@ -180,15 +180,10 @@ export const setCanvas = (canvasElement: HTMLCanvasElement): SetCanvasElement =>
     payload: canvasElement
 })
 
-export const setNonEditable = async (canvasSaver: SymfoniCanvasSaver, dispatch: React.Dispatch<CanvasActions>): Promise<SetNonEditable> => {
-
-    const objectList = await onGetEventLog(canvasSaver, dispatch)
-
-    return {
-        type: ActionType.SetNonEditable,
-        payload: objectList
-    }
-}
+export const setNonEditable = (drawings: any[]): SetNonEditable => ({
+    type: ActionType.SetNonEditable,
+    payload: drawings
+})
 
 export const setNFTs = (nfts: {}[]): SetNFT => ({
     type: ActionType.SetNFT,

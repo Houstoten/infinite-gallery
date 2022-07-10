@@ -1,19 +1,18 @@
-import { FC } from "react";
-import { useCanvas } from "../state/context";
+import { FC, useEffect, useState } from "react";
 import { Progress } from '@nextui-org/react';
 import { CSSTransition } from 'react-transition-group';
 import styles from '../styles/Home.module.css'
 
-const SplashScreen: FC<{indeterminated?: boolean, transition?: boolean}> = ({indeterminated = false, transition = true}) => {
-    const { state } = useCanvas()
+const SplashScreen: FC<{indeterminated?: boolean, transition?: boolean, promise: Promise<any>}> = ({indeterminated = true, transition = true, promise}) => {
+    const [loading, setLoading] = useState<boolean>(true)
 
-    const { splashLoading: { initial: splashInitial, progress: splashProgress, loading: splashLoading } } = state
-
-    const _indeterminated = indeterminated || (splashLoading && !splashInitial)
+    useEffect(() => {
+        promise && promise.then(() => setLoading(false))
+    }, [])
 
     return <CSSTransition
 
-        in={splashLoading}
+        in={loading}
         unmountOnExit
         classNames={{
             enter: styles.splashEnter,
@@ -34,11 +33,11 @@ const SplashScreen: FC<{indeterminated?: boolean, transition?: boolean}> = ({ind
             zIndex: 1000000
         }}>
             <Progress
-                indeterminated={splashLoading && !splashInitial}
+                indeterminated={indeterminated}
                 css={{ width: 400 }}
-                max={splashLoading ? splashInitial : 10}
+                // max={splashLoading ? splashInitial : 10}
                 color="primary"
-                value={splashLoading ? splashProgress : 10}
+                // value={splashLoading ? splashProgress : 10}
             />
         </div>
     </CSSTransition>
