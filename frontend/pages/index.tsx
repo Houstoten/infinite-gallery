@@ -44,7 +44,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const canvasSaverConractAddress = process.env.NEXT_PUBLIC_CANVAS_SAVER_ADDRESS || ""
 
   //fetch nft
-  const { result: suppliedNfts } = await fetch(`${moralisApi}/nft/${nftContractAddress}?format=decimal&chain=rinkeby`,
+  const { result: suppliedNfts = [] } = await fetch(`${moralisApi}/nft/${nftContractAddress}?format=decimal&chain=rinkeby`,
     {
       headers: {
         "x-api-key": moralisApiKey
@@ -57,7 +57,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   //fetch drawings
 
-  const { result } = await fetch(`${moralisApi}/${canvasSaverConractAddress}/events?chain=rinkeby&topic=${saveToLog}`,
+  const { result = [] } = await fetch(`${moralisApi}/${canvasSaverConractAddress}/events?chain=rinkeby&topic=${saveToLog}`,
     {
       method: "POST",
       body: JSON.stringify(saveToLogAbi),
