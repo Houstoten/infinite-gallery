@@ -2,7 +2,9 @@
 
 **🚧Project is under development🚧**
 
-# 🖼 Draw your own NFT anywhere on the infinite canvas. With OpenSea integration for robust bids. 
+# 🖼 Draw your own NFT anywhere on the infinite canvas. With OpenSea integration for fast bids. 
+
+![infinite_gallery](https://user-images.githubusercontent.com/50377678/184995105-bfee9dd8-3d8a-47ee-9340-7f5c5815eaf6.gif)
 
 ⚡Contracts deployed to Goerli network⚡
 
